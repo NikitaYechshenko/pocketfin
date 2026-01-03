@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+asyncpg
+pydantic-settings
+python-dotenv
+
+# pip-compile requirements.in
