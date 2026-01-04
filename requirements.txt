@@ -50,6 +50,8 @@ python-dotenv==1.2.1
     #   uvicorn
 pyyaml==6.0.3
     # via uvicorn
+psycopg[binary]==3.2.10
+    # via -r requirements.in
 sqlalchemy==2.0.45
     # via sqlmodel
 sqlmodel==0.0.31
