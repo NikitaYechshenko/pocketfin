@@ -5,5 +5,9 @@ asyncpg
 psycopg[binary]
 pydantic-settings
 python-dotenv
+passlib[bcrypt]
+# Pin bcrypt to avoid known incompatibilities with passlib 1.7.x
+bcrypt<4.1.0
+python-jose
 
 # pip-compile requirements.in
