@@ -1,8 +1,8 @@
 import logging
 from fastapi import FastAPI
 import uvicorn
-from backend.app.routers import user
-from backend.app.core.database_sqlalchemy import Base, engine
+from app.modules.users import router as user
+from app.core.database import Base, engine
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
