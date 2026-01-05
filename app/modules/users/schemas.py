@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr
 
 # Базовая схема (общие поля)
@@ -16,7 +18,7 @@ class UserLogin(UserBase):
 class UserResponse(UserBase):
     id: int
     is_active: bool
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True  # Чтобы Pydantic читал данные из SQLAlchemy моделей

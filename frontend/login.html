@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>FastAPI SPA Client</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        h1, h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fdc;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #edf2f7;
+            color: #333;
+            margin-top: 8px;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .users-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .card b {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+    <h1>FastAPI SPA Client</h1>
+
+    <!-- LOGIN -->
+    <div id="loginSection">
+        <h3>Вход</h3>
+
+        <div class="field">
+            <input id="loginEmail" placeholder="Email" value="" />
+        </div>
+
+        <div class="field">
+            <input id="loginPassword" type="password" placeholder="Пароль" value="" />
+        </div>
+
+        <button class="btn-primary" onclick="login()">Войти</button>
+        <button class="btn-secondary" onclick="showRegisterScreen()">Регистрация</button>
+        <div id="loginError" class="error"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerSection" class="hidden">
+        <h3>Регистрация</h3>
+
+        <div class="field">
+            <input id="registerEmail" placeholder="Email" value="" />
+        </div>
+
+        <div class="field">
+            <input id="registerPassword" type="password" placeholder="Пароль (минимум 8 символов)" value="" />
+        </div>
+
+        <button class="btn-primary" onclick="register()">Создать аккаунт</button>
+        <button class="btn-secondary" onclick="showLoginScreen()">Назад</button>
+        <div id="registerError" class="error"></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="usersSection" class="hidden">
+        <h3>Пользователи</h3>
+
+        <div class="users-header">
+            <button class="btn-secondary" onclick="loadUsers()">Обновить</button>
+            <button class="btn-danger" onclick="logout()">Выйти</button>
+        </div>
+
+        <div id="usersList"></div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    function el(id) {
+        return document.getElementById(id);
+    }
+
+    function showLoginScreen() {
+        el("registerSection").classList.add("hidden");
+        el("usersSection").classList.add("hidden");
+        el("loginSection").classList.remove("hidden");
+        el("loginError").innerText = "";
+        el("registerError").innerText = "";
+        el("usersList").innerHTML = "";
+    }
+
+    function showRegisterScreen() {
+        el("loginSection").classList.add("hidden");
+        el("usersSection").classList.add("hidden");
+        el("registerSection").classList.remove("hidden");
+        el("loginError").innerText = "";
+        el("registerError").innerText = "";
+    }
+
+    async function readError(response) {
+        try {
+            const data = await response.json();
+            if (typeof data?.detail === "string") return data.detail;
+            if (Array.isArray(data?.detail)) return "Неверные данные";
+            return "Ошибка";
+        } catch {
+            return "Ошибка";
+        }
+    }
+
+    async function login() {
+        const email = el("loginEmail").value.trim();
+        const password = el("loginPassword").value;
+        el("loginError").innerText = "";
+
+        if (!email || !password) {
+            el("loginError").innerText = "Введите email и пароль";
+            return;
+        }
+
+        const response = await fetch(`${API_URL}/users/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem("token", data.access_token);
+            showUsersScreen();
+        } else {
+            el("loginError").innerText = await readError(response);
+        }
+    }
+
+    async function register() {
+        const email = el("registerEmail").value.trim();
+        const password = el("registerPassword").value;
+        el("registerError").innerText = "";
+
+        if (!email || !password) {
+            el("registerError").innerText = "Введите email и пароль";
+            return;
+        }
+
+        const response = await fetch(`${API_URL}/users/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+            // после успешной регистрации просто перекинем на вход
+            el("loginEmail").value = email;
+            el("loginPassword").value = "";
+            showLoginScreen();
+        } else {
+            el("registerError").innerText = await readError(response);
+        }
+    }
+
+    async function loadUsers() {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/users/?skip=0&limit=100`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        const users = await response.json();
+        el("usersList").innerHTML = "";
+
+        users.forEach(u => {
+            const div = document.createElement("div");
+            div.className = "card";
+            div.innerHTML = `
+                <b>ID:</b> ${u.id}<br />
+                <b>Email:</b> ${u.email}<br />
+                <b>Active:</b> ${u.is_active}
+            `;
+            el("usersList").appendChild(div);
+        });
+    }
+
+    function showUsersScreen() {
+        el("loginSection").classList.add("hidden");
+        el("registerSection").classList.add("hidden");
+        el("usersSection").classList.remove("hidden");
+        loadUsers();
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        showLoginScreen();
+    }
+
+    // initial screen
+    if (localStorage.getItem("token")) {
+        showUsersScreen();
+    } else {
+        showLoginScreen();
+    }
+
+    if (localStorage.getItem("token")) {
+        showUsersScreen();
+    }
+</script>
+</body>
+</html>
