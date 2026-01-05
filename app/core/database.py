@@ -9,25 +9,25 @@ logger = logging.getLogger(__name__)
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    echo=True,
+    echo=False,
     connect_args={"connect_timeout": 3},
-    echo_pool=True,
+    pool_pre_ping=True,
+    pool_recycle=3600,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+
 def check_database_connection():
-    """Проверяет соединение с БД"""
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-        logger.info("✓ Соединение с БД успешно установлено")
+        logger.info("✓ Database connection established")
         return True
     except Exception as e:
-        logger.error(f"✗ Ошибка соединения с БД: {str(e)}")
+        logger.error(f"✗ Database connection error: {str(e)}")
         return False
-
 
 
 def get_db():
@@ -35,7 +35,8 @@ def get_db():
     try:
         yield db
     except Exception as e:
-        logger.error(f"Ошибка работы с БД: {str(e)}")
+        logger.error(f"Database session error: {str(e)}")
+        db.rollback()
         raise
     finally:
         db.close()

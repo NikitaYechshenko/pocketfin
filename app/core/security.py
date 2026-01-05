@@ -10,7 +10,6 @@ from app.core.config import settings
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1
-# bcrypt has a 72-byte password limit; bcrypt_sha256 avoids that by pre-hashing.
 pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 def get_password_hash(password: str) -> str:
