@@ -1,35 +1,53 @@
 import logging
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-import uvicorn
-from app.core.database import Base, engine
-from fastapi.middleware.cors import CORSMiddleware
-from app.modules.users import router as user
-from app.core.database import SessionLocal
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
+from fastapi import FastAPI
+from app.core.database import check_database_connection
+from app.core.health import start_health_check
+from app.modules.users.router import router as users_router
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
-app = FastAPI()
-
-# Глобальный обработчик ошибок БД
-@app.exception_handler(SQLAlchemyError)
-async def database_exception_handler(request: Request, exc: SQLAlchemyError):
-    logger.error(f"❌ Ошибка БД: {exc}")
-    return JSONResponse(
-        status_code=503,
-        content={"detail": "База данных недоступна. Попробуйте позже."}
-    )
-
-app.include_router(user.router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # В проде здесь будет адрес твоего сайта
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Asset Tracker")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Проверка БД при запуске приложения"""
+    logger.info("🚀 Запуск Asset Tracker...")
+    if check_database_connection():
+        logger.info("✓ Приложение готово к работе")
+        start_health_check(interval=120)  # 2 минуты
+    else:
+        logger.error("✗ Не удалось подключиться к БД. Проверьте .env")
+        raise RuntimeError("Database connection failed on startup")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Логирование при выключении"""
+    logger.info("🛑 Asset Tracker остановлен")
+
+
+# Регистрация роутеров
+app.include_router(users_router, prefix="/users", tags=["users"])
+
+
+@app.get("/health")
+async def health_check():
+    """Endpoint для проверки здоровья приложения"""
+    from app.core.database import check_database_connection
+    is_connected = check_database_connection()
+    return {
+        "status": "ok" if is_connected else "error",
+        "database": "connected" if is_connected else "disconnected"
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 

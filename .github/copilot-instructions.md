@@ -9,10 +9,13 @@
 - API app creation + router registration: `app/main.py` (includes `app.modules.users.router`).
 - Settings: `app/core/config.py` (`DATABASE_URL`, `SECRET_KEY` from `.env`).
 - DB session dependency: `app/core/database.py` (`get_db()` yields a `Session`).
+- Health check: `app/core/health.py` (фоновая проверка БД каждые 2 минуты).
+- Database health endpoint: `GET /health` для мониторинга соединения.
 
 ## Module conventions (example: users)
 - Router: `app/modules/users/router.py`
   - Endpoints live here and should be thin; use `Depends(get_db)` to get a DB session.
+  - All endpoints log request start, success, and errors with appropriate levels (info/warning/error).
 - Service: `app/modules/users/service.py`
   - Business logic (registration/auth) lives here; raises `HTTPException` for domain errors.
 - Repository: `app/modules/users/repository.py`
@@ -24,6 +27,12 @@
 - Token creation is implemented in `app/core/security.py` (HS256 JWT).
 - `ACCESS_TOKEN_EXPIRE_MINUTES` is currently **1 minute**.
 - The sample frontend sends `Authorization: Bearer <token>` for `/users/`, but the backend route is not yet protected.
+
+## Logging & Monitoring
+- Logging configured in `app/main.py` with format: `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
+- Database health check runs automatically every **2 minutes** via `start_health_check(interval=120)`
+- All database operations have connection monitoring via `pool_pre_ping=True` and `pool_recycle=3600`
+- Router endpoints log: request start (info), success (info), domain errors (warning), critical errors (error)
 
 ## Migrations (Alembic)
 - Alembic config is in `alembic/env.py` and forces `sqlalchemy.url` from `.env`.

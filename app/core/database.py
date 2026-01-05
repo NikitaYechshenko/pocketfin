@@ -1,36 +1,41 @@
 import logging
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import SQLAlchemyError
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
-
-# pool_pre_ping: проверяет соединение перед использованием (не даст отвалиться)
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    pool_pre_ping=True,
+    echo=True,
+    connect_args={"connect_timeout": 3},
+    echo_pool=True,
 )
 
-# Логирование событий пула соединений
-@event.listens_for(engine, "connect")
-def on_connect(dbapi_conn, connection_record):
-    logger.info("✓ Новое подключение к БД установлено")
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
+
+def check_database_connection():
+    """Проверяет соединение с БД"""
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        logger.info("✓ Соединение с БД успешно установлено")
+        return True
+    except Exception as e:
+        logger.error(f"✗ Ошибка соединения с БД: {str(e)}")
+        return False
+
 
 
 def get_db():
     db = SessionLocal()
     try:
         yield db
-    except SQLAlchemyError as e:
-        logger.error(f"Error DB in session: {e}")
+    except Exception as e:
+        logger.error(f"Ошибка работы с БД: {str(e)}")
         raise
     finally:
         db.close()
