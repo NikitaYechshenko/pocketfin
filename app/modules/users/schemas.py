@@ -1,29 +1,16 @@
-from datetime import datetime
+from typing import Optional
+from fastapi_users import schemas
 
-from pydantic import BaseModel, EmailStr
+# 1. Схема для чтения (то, что отдаем фронту)
+class UserRead(schemas.BaseUser[int]):
+    # id, email, is_active, is_superuser, is_verified уже включены
+    pass
 
-# Базовая схема (общие поля)
-class UserBase(BaseModel):
-    email: EmailStr
+# 2. Схема для создания (регистрация)
+class UserCreate(schemas.BaseUserCreate):
+    # email, password, is_active, is_superuser, is_verified уже включены
+    pass
 
-# Схема для РЕГИСТРАЦИИ (клиент шлет пароль)
-class UserCreate(UserBase):
-    password: str
-
-# Схема для ВХОДА (клиент шлет email и пароль)
-class UserLogin(UserBase):
-    password: str
-
-# Схема для ОТВЕТА (мы НЕ возвращаем пароль, возвращаем id и активность)
-class UserResponse(UserBase):
-    id: int
-    is_active: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True  # Чтобы Pydantic читал данные из SQLAlchemy моделей
-
-# Схема для ТОКЕНА (то, что мы вернем после успешного входа)
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+# 3. Схема для обновления (редактирование профиля)
+class UserUpdate(schemas.BaseUserUpdate):
+    pass

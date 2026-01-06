@@ -1,0 +1,955 @@
+
+
+====================
+FILE: .\.env
+====================
+
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5433/gat_db
+SECRET_KEY = ldfihfdijvnjidfnbviujdfhjlkkldjfoijoidfgoi
+
+====================
+FILE: .\.gitignore
+====================
+
+venv/
+__pycache__/
+.env
+*.db
+
+
+====================
+FILE: .\alembic.ini
+====================
+
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts.
+# this is typically a path given in POSIX (e.g. forward slashes)
+# format, relative to the token %(here)s which refers to the location of this
+# ini file
+script_location = %(here)s/alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# see https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
+# for all available tokens
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.  for multiple paths, the path separator
+# is defined by "path_separator" below.
+prepend_sys_path = .
+
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the tzdata library which can be installed by adding
+# `alembic[tz]` to the pip requirements.
+# string value is passed to ZoneInfo()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version location specification; This defaults
+# to <script_location>/versions.  When using multiple version
+# directories, initial revisions must be specified with --version-path.
+# The path separator used here should be the separator specified by "path_separator"
+# below.
+# version_locations = %(here)s/bar:%(here)s/bat:%(here)s/alembic/versions
+
+# path_separator; This indicates what character is used to split lists of file
+# paths, including version_locations and prepend_sys_path within configparser
+# files such as alembic.ini.
+# The default rendered in new alembic.ini files is "os", which uses os.pathsep
+# to provide os-dependent path splitting.
+#
+# Note that in order to support legacy alembic.ini files, this default does NOT
+# take place if path_separator is not present in alembic.ini.  If this
+# option is omitted entirely, fallback logic is as follows:
+#
+# 1. Parsing of the version_locations option falls back to using the legacy
+#    "version_path_separator" key, which if absent then falls back to the legacy
+#    behavior of splitting on spaces and/or commas.
+# 2. Parsing of the prepend_sys_path option falls back to the legacy
+#    behavior of splitting on spaces, commas, or colons.
+#
+# Valid values for path_separator are:
+#
+# path_separator = :
+# path_separator = ;
+# path_separator = space
+# path_separator = newline
+#
+# Use os.pathsep. Default configuration used for new projects.
+path_separator = os
+
+# set to 'true' to search source files recursively
+# in each "version_locations" directory
+# new in Alembic version 1.10
+# recursive_version_locations = false
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+# database URL.  This is consumed by the user-maintained env.py script only.
+# other means of configuring database URLs may be customized within the env.py
+# file.
+sqlalchemy.url = driver://user:pass@localhost/dbname
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the module runner, against the "ruff" module
+# hooks = ruff
+# ruff.type = module
+# ruff.module = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Alternatively, use the exec runner to execute a binary found on your PATH
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration.  This is also consumed by the user-maintained
+# env.py script only.
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARNING
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARNING
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+
+
+====================
+FILE: .\docker-compose.yml
+====================
+
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gat_db
+    # Самая важная часть для тебя:
+    ports:
+      - "5433:5432"
+      # Слева (5433) - порт твоего Windows.
+      # Справа (5432) - порт внутри контейнера.
+      # Теперь любая программа на твоем ПК может стучаться в порт 5433 и попадать в контейнер.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+====================
+FILE: .\requirements.txt
+====================
+
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic-settings==2.1.0
+sqlalchemy==2.0.25
+alembic==1.13.1
+# Главные герои:
+asyncpg==0.29.0              # Асинхронный драйвер для PostgreSQL
+fastapi-users[sqlalchemy]==13.0.0  # Готовая библиотека для пользователей
+python-dotenv==1.0.1
+email-validator==2.1.0.post1
+
+====================
+FILE: .\.copilot\instructions.md
+====================
+
+## Git Rules (MANDATORY)
+
+After EVERY code change:
+1. Summarize what was changed
+2. Generate a Git commit message in this format:
+
+type(scope): short summary
+
+- bullet point change 1
+- bullet point change 2
+
+Types allowed:
+- feat
+- fix
+- refactor
+- chore
+- docs
+- test
+
+Do NOT skip this step.
+
+
+====================
+FILE: .\.github\copilot-instructions.md
+====================
+
+# Copilot instructions (Asset Tracker)
+
+## Big picture
+- Backend is a **FastAPI** app with a simple layered module pattern: **router → service → repository → SQLAlchemy model**.
+- DB access is **sync SQLAlchemy** (`SessionLocal` + `create_engine`), configured from `.env` via Pydantic Settings.
+- Migrations are **Alembic**, wired to read the DB URL from app settings (not from `alembic.ini`).
+
+## Key entrypoints
+- API app creation + router registration: `app/main.py` (includes `app.modules.users.router`).
+- Settings: `app/core/config.py` (`DATABASE_URL`, `SECRET_KEY` from `.env`).
+- DB session dependency: `app/core/database.py` (`get_db()` yields a `Session`).
+- Health check: `app/core/health.py` (фоновая проверка БД каждые 2 минуты).
+- Database health endpoint: `GET /health` для мониторинга соединения.
+
+## Module conventions (example: users)
+- Router: `app/modules/users/router.py`
+  - Endpoints live here and should be thin; use `Depends(get_db)` to get a DB session.
+  - All endpoints log request start, success, and errors with appropriate levels (info/warning/error).
+- Service: `app/modules/users/service.py`
+  - Business logic (registration/auth) lives here; raises `HTTPException` for domain errors.
+- Repository: `app/modules/users/repository.py`
+  - DB queries and persistence; note there are **backward-compatible aliases** (`get_by_email` → `get_user_by_email`, `create` → `create_user`).
+- SQLAlchemy models: `app/modules/users/models.py` (declares `Base` + `__tablename__ = "users"`).
+- Pydantic schemas: `app/modules/users/schemas.py` (responses use `Config.from_attributes = True`).
+
+## Auth/token notes
+- Token creation is implemented in `app/core/security.py` (HS256 JWT).
+- `ACCESS_TOKEN_EXPIRE_MINUTES` is currently **1 minute**.
+- The sample frontend sends `Authorization: Bearer <token>` for `/users/`, but the backend route is not yet protected.
+
+## Logging & Monitoring
+- Logging configured in `app/main.py` with format: `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
+- Database health check runs automatically every **2 minutes** via `start_health_check(interval=120)`
+- All database operations have connection monitoring via `pool_pre_ping=True` and `pool_recycle=3600`
+- Router endpoints log: request start (info), success (info), domain errors (warning), critical errors (error)
+
+## Migrations (Alembic)
+- Alembic config is in `alembic/env.py` and forces `sqlalchemy.url` from `.env`.
+- For `--autogenerate` to see new models, import them in `alembic/env.py` (currently imports `app.modules.users.models`).
+
+## Local dev workflow (Windows)
+- Start Postgres: `docker compose up -d` (see `docker-compose.yml`, host port **5433** → container **5432**).
+- Configure `.env` (file is gitignored):
+  - `DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5433/gat_db`
+  - `SECRET_KEY=...`
+- Install deps: `pip install -r requirements.txt`
+- Apply migrations: `alembic upgrade head`
+- Run API: `uvicorn app.main:app --reload`
+
+## Frontend integration
+- `frontend/login.html` calls `http://127.0.0.1:8000`:
+  - `POST /users/register`, `POST /users/login`, `GET /users/?skip=0&limit=100`
+
+## Dependency management
+- `requirements.txt` is generated by `pip-compile` from `requirements.in`.
+- Update `requirements.in`, then regenerate (example): `pip-compile requirements.in`
+
+## Git Rules (MANDATORY)
+
+After EVERY code change:
+1. Summarize what was changed
+2. Generate a Git commit message in this format:
+
+type(scope): short summary
+
+- bullet point change 1
+- bullet point change 2
+
+Types allowed:
+- feat
+- fix
+- refactor
+- chore
+- docs
+- test
+
+Do NOT skip this step.
+
+and after any change also change this file `.github/copilot-instructions.md` to reflect the changes made in the codebase.
+
+Dont look at folder Frontend (it's not ready yet).
+
+====================
+FILE: .\alembic\env.py
+====================
+
+import asyncio
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config, create_async_engine
+
+from app.core.config import settings
+from app.core.database import Base
+# Импорт моделей ОБЯЗАТЕЛЕН, чтобы Alembic их увидел
+from app.modules.users import models  # noqa
+
+# Alembic Config object
+config = context.config
+
+# Setup logging
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# Set DB URL
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+target_metadata = Base.metadata
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode."""
+    url = settings.DATABASE_URL
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode using AsyncEngine."""
+
+    # Создаем движок
+    connectable = create_async_engine(
+        settings.DATABASE_URL,
+        poolclass=pool.NullPool,
+    )
+
+    async def do_run_migrations():
+        # !!! ИСПРАВЛЕНИЕ ЗДЕСЬ !!!
+        # Мы используем 'async with', чтобы реально открыть соединение
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations_sync)
+        
+        # Хорошая практика: закрыть движок после использования
+        await connectable.dispose()
+
+    def do_run_migrations_sync(connection: Connection):
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True, # Важно для отслеживания изменений типов колонок
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+    # Запускаем асинхронную функцию
+    asyncio.run(do_run_migrations())
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+====================
+FILE: .\alembic\README
+====================
+
+Generic single-database configuration.
+
+====================
+FILE: .\alembic\script.py.mako
+====================
+
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+# revision identifiers, used by Alembic.
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    ${downgrades if downgrades else "pass"}
+
+
+====================
+FILE: .\alembic\versions\352bad58e128_user_table_update_registration_login.py
+====================
+
+"""user table update, registration,login,
+
+Revision ID: 352bad58e128
+Revises: e5b85720cf78
+Create Date: 2026-01-05 00:54:13.163649
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+# revision identifiers, used by Alembic.
+revision: str = '352bad58e128'
+down_revision: Union[str, Sequence[str], None] = 'e5b85720cf78'
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('users', sa.Column('is_active', sa.Boolean(), nullable=True))
+    op.drop_index(op.f('ix_users_username'), table_name='users')
+    op.drop_column('users', 'updated_at')
+    op.drop_column('users', 'username')
+    op.drop_column('users', 'is_superuser')
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.add_column('users', sa.Column('is_superuser', sa.BOOLEAN(), autoincrement=False, nullable=True))
+    op.add_column('users', sa.Column('username', sa.VARCHAR(length=50), autoincrement=False, nullable=False))
+    op.add_column('users', sa.Column('updated_at', postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True))
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+    op.drop_column('users', 'is_active')
+    # ### end Alembic commands ###
+
+
+====================
+FILE: .\alembic\versions\e5b85720cf78_add_users_table.py
+====================
+
+"""add users table
+
+Revision ID: e5b85720cf78
+Revises: 
+Create Date: 2026-01-04 22:13:59.585761
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'e5b85720cf78'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=50), nullable=False),
+    sa.Column('email', sa.String(length=100), nullable=False),
+    sa.Column('hashed_password', sa.String(length=255), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+    # ### end Alembic commands ###
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_users_username'), table_name='users')
+    op.drop_index(op.f('ix_users_id'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
+    # ### end Alembic commands ###
+
+
+====================
+FILE: .\app\main.py
+====================
+
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.modules.users.schemas import UserRead, UserCreate, UserUpdate
+from app.modules.users.manager import auth_backend, fastapi_users
+
+# Логирование
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Жизненный цикл (замена on_event startup)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Тут можно добавить проверку БД при старте
+    logger.info("🚀 Starting Asset Tracker (Async)...")
+    yield
+    logger.info("🛑 Asset Tracker stopped")
+
+app = FastAPI(title="Asset Tracker", lifespan=lifespan)
+
+# CORS (Обязательно для фронтенда!)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # В проде укажите конкретный домен
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# === ПОДКЛЮЧЕНИЕ РОУТЕРОВ FastAPI Users ===
+
+# 1. Login / Logout
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/auth/jwt",
+    tags=["auth"],
+)
+
+# 2. Регистрация
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"],
+)
+
+# 3. Управление пользователями (получить текущего, обновить профиль и т.д.)
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"],
+)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "mode": "async"}
+
+====================
+FILE: .\app\__init__.py
+====================
+
+
+
+====================
+FILE: .\app\core\config.py
+====================
+
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    DATABASE_URL: str
+    SECRET_KEY: str
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings()
+
+
+====================
+FILE: .\app\core\database.py
+====================
+
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from app.core.config import settings
+
+# 1. Создаем асинхронный движок
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=False,
+    future=True,
+)
+
+# 2. Создаем фабрику асинхронных сессий
+async_session_maker = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+
+Base = declarative_base()
+
+# 3. Асинхронная зависимость для получения сессии (Dependency)
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_maker() as session:
+        yield session
+
+====================
+FILE: .\app\core\__init__.py
+====================
+
+
+
+====================
+FILE: .\app\modules\users\manager.py
+====================
+
+from typing import Optional
+
+from fastapi import Depends, Request
+from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin
+from fastapi_users.authentication import (
+    AuthenticationBackend,
+    BearerTransport,
+    JWTStrategy,
+)
+from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
+from app.core.database import get_async_session
+from app.modules.users.models import User
+
+# 1. Настройка БД для библиотеки
+async def get_user_db(session: AsyncSession = Depends(get_async_session)):
+    yield SQLAlchemyUserDatabase(session, User)
+
+# 2. Менеджер пользователей (бизнес-логика)
+class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
+    reset_password_token_secret = settings.SECRET_KEY
+    verification_token_secret = settings.SECRET_KEY
+
+    async def on_after_register(self, user: User, request: Optional[Request] = None):
+        print(f"User {user.id} has registered.")
+
+async def get_user_manager(user_db=Depends(get_user_db)):
+    yield UserManager(user_db)
+
+# 3. Настройка Аутентификации (JWT)
+# Transport = Bearer (токен в заголовке Authorization: Bearer <token>)
+bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+
+def get_jwt_strategy() -> JWTStrategy:
+    return JWTStrategy(secret=settings.SECRET_KEY, lifetime_seconds=3600)
+
+auth_backend = AuthenticationBackend(
+    name="jwt",
+    transport=bearer_transport,
+    get_strategy=get_jwt_strategy,
+)
+
+# 4. Главный объект FastAPIUsers (связывает всё воедино)
+fastapi_users = FastAPIUsers[User, int](
+    get_user_manager,
+    [auth_backend],
+)
+
+# 5. Хелпер для получения текущего юзера (замена нашей старой функции)
+current_active_user = fastapi_users.current_user(active=True)
+
+====================
+FILE: .\app\modules\users\models.py
+====================
+
+# from sqlalchemy import Column, Integer, String, Boolean, DateTime
+# from sqlalchemy.sql import func
+# from app.core.database import Base
+
+
+# class User(Base):
+#     __tablename__ = "users"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     email = Column(String(100), unique=True, nullable=False, index=True)
+#     hashed_password = Column(String(255), nullable=False)
+#     is_active = Column(Boolean, default=True)
+#     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+from fastapi_users.db import SQLAlchemyBaseUserTable
+from sqlalchemy import Column, Integer, String
+from app.core.database import Base
+
+# Наследуемся от Base (наш) и SQLAlchemyBaseUserTable (от библиотеки)
+class User(SQLAlchemyBaseUserTable[int], Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    # email, hashed_password, is_active, is_superuser, is_verified 
+    # уже есть внутри SQLAlchemyBaseUserTable, писать их не нужно!
+    
+    # Можем добавить свои поля, если захотим, например:
+    # phone = Column(String, nullable=True)
+
+====================
+FILE: .\app\modules\users\schemas.py
+====================
+
+from typing import Optional
+from fastapi_users import schemas
+
+# 1. Схема для чтения (то, что отдаем фронту)
+class UserRead(schemas.BaseUser[int]):
+    # id, email, is_active, is_superuser, is_verified уже включены
+    pass
+
+# 2. Схема для создания (регистрация)
+class UserCreate(schemas.BaseUserCreate):
+    # email, password, is_active, is_superuser, is_verified уже включены
+    pass
+
+# 3. Схема для обновления (редактирование профиля)
+class UserUpdate(schemas.BaseUserUpdate):
+    pass
+
+====================
+FILE: .\app\modules\users\__init__.py
+====================
+
+
+
+====================
+FILE: .\frontend\login.html
+====================
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <title>FastAPI Users Client</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; }
+        h2 { text-align: center; color: #333; }
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        .secondary { background: #6c757d; margin-top: 5px; }
+        .secondary:hover { background: #545b62; }
+        .error { color: red; font-size: 0.9rem; text-align: center; margin-top: 10px; }
+        .hidden { display: none; }
+        pre { background: #eee; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="title">Вход</h2>
+
+    <div id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" />
+        <input type="password" id="loginPass" placeholder="Пароль" />
+        <button onclick="login()">Войти</button>
+        <button class="secondary" onclick="toggleScreen('register')">Нет аккаунта? Регистрация</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+        <input type="email" id="regEmail" placeholder="Email" />
+        <input type="password" id="regPass" placeholder="Пароль (минимум 3 символа)" />
+        <button onclick="register()">Зарегистрироваться</button>
+        <button class="secondary" onclick="toggleScreen('login')">Назад ко входу</button>
+    </div>
+
+    <div id="profileArea" class="hidden">
+        <p>Вы вошли как:</p>
+        <div id="userInfo" style="font-weight: bold; margin-bottom: 10px;"></div>
+        <button onclick="getMe()">Обновить данные (Get Me)</button>
+        <button class="secondary" style="background: #dc3545;" onclick="logout()">Выйти</button>
+        
+        <p style="margin-top: 15px; font-size: 0.9rem;">Ответ сервера:</p>
+        <pre id="serverData">...</pre>
+    </div>
+
+    <div id="errorMsg" class="error"></div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    // Управление экранами
+    function toggleScreen(screen) {
+        document.getElementById('errorMsg').innerText = "";
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('profileArea').classList.add('hidden');
+        
+        if(screen === 'login') {
+            document.getElementById('title').innerText = "Вход";
+            document.getElementById('loginForm').classList.remove('hidden');
+        } else if (screen === 'register') {
+            document.getElementById('title').innerText = "Регистрация";
+            document.getElementById('registerForm').classList.remove('hidden');
+        } else if (screen === 'profile') {
+            document.getElementById('title').innerText = "Профиль";
+            document.getElementById('profileArea').classList.remove('hidden');
+        }
+    }
+
+    // 1. РЕГИСТРАЦИЯ (Отправляем JSON)
+    async function register() {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPass').value;
+        const err = document.getElementById('errorMsg');
+
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            if (res.ok) {
+                alert("Регистрация успешна! Теперь войдите.");
+                toggleScreen('login');
+                document.getElementById('loginEmail').value = email;
+            } else {
+                const data = await res.json();
+                err.innerText = "Ошибка: " + JSON.stringify(data.detail);
+            }
+        } catch (e) {
+            err.innerText = "Ошибка соединения: " + e;
+        }
+    }
+
+    // 2. ВХОД (Отправляем Form Data - требование OAuth2)
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPass').value;
+        const err = document.getElementById('errorMsg');
+
+        // FormData для x-www-form-urlencoded
+        const formData = new URLSearchParams();
+        formData.append('username', email); // Важно: поле username, а не email
+        formData.append('password', password);
+
+        try {
+            const res = await fetch(`${API_URL}/auth/jwt/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('token', data.access_token);
+                toggleScreen('profile');
+                getMe(); // Сразу загружаем данные юзера
+            } else {
+                err.innerText = "Неверный логин или пароль";
+            }
+        } catch (e) {
+            err.innerText = "Ошибка соединения";
+        }
+    }
+
+    // 3. ПОЛУЧЕНИЕ ДАННЫХ (Защищенный роут)
+    async function getMe() {
+        const token = localStorage.getItem('token');
+        if (!token) return logout();
+
+        try {
+            const res = await fetch(`${API_URL}/users/me`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const user = await res.json();
+                document.getElementById('userInfo').innerText = user.email;
+                document.getElementById('serverData').innerText = JSON.stringify(user, null, 2);
+            } else {
+                logout(); // Токен протух
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        toggleScreen('login');
+    }
+
+    // Проверка при загрузке
+    if (localStorage.getItem('token')) {
+        toggleScreen('profile');
+        getMe();
+    }
+</script>
+
+</body>
+</html>
