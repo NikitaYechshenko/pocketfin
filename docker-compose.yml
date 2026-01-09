@@ -8,14 +8,19 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gat_db
-    # Самая важная часть для тебя:
+
     ports:
+      ports:
       - "5433:5432"
-      # Слева (5433) - порт твоего Windows.
-      # Справа (5432) - порт внутри контейнера.
-      # Теперь любая программа на твоем ПК может стучаться в порт 5433 и попадать в контейнер.
+      # Host Port (5433) : Container Port (5432)
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
+
+
+# docker volume rm $(docker volume ls -q)
+# docker compose down -v
+# docker compose up --build
+

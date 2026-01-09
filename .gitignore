@@ -1,4 +1,37 @@
 venv/
 __pycache__/
-.env
+
 *.db
+full_project_context.txt
+.copilot/
+.github/
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Frontend & Node
+node_modules/
+dist/
+build/
+.DS_Store
+
+# IDE & Editor specific
+.idea/
+.vscode/
+*.swp
+
+# Logs & Databases
+*.log
+*.sqlite
+*.db
+
+# Copilot & AI Garbage (Requested exclusions)
+.copilot/
+.github/copilot-instructions.md
+.scripts/
+save_code.py
+full_project_context.txt

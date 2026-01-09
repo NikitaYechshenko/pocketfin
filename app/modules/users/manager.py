@@ -14,27 +14,29 @@ from app.core.config import settings
 from app.core.database import get_async_session
 from app.modules.users.models import User
 
-# 1. Настройка БД для библиотеки
+# 1. Database setup for fastapi-users library
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)
 
-# 2. Менеджер пользователей (бизнес-логика)
+# 2. User manager (business logic)
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = settings.SECRET_KEY
     verification_token_secret = settings.SECRET_KEY
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
+        # Placeholder for post-registration logic (e.g., send welcome email)
+        pass
 
 async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)
 
-# 3. Настройка Аутентификации (JWT)
-# Transport = Bearer (токен в заголовке Authorization: Bearer <token>)
+# 3. Authentication setup (JWT)
+# Transport = Bearer (token in Authorization header: Bearer <token>)
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.SECRET_KEY, lifetime_seconds=3600)
+
 
 auth_backend = AuthenticationBackend(
     name="jwt",
@@ -42,11 +44,11 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-# 4. Главный объект FastAPIUsers (связывает всё воедино)
+# 4. Main FastAPIUsers object (connects everything together)
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
     [auth_backend],
 )
 
-# 5. Хелпер для получения текущего юзера (замена нашей старой функции)
+# 5. Helper to get current user (replacement for our old function)
 current_active_user = fastapi_users.current_user(active=True)

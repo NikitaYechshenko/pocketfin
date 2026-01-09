@@ -8,8 +8,12 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import settings
 from app.core.database import Base
-# Импорт моделей ОБЯЗАТЕЛЕН, чтобы Alembic их увидел
-from app.modules.users import models  # noqa [cite: 39]
+
+
+# make sure to import all your models here for 'autogenerate' support
+from app.modules.users.models import User
+from app.modules.portfolio.models import Portfolio
+from app.modules.asset.models import Asset
 
 # Alembic Config object
 config = context.config
@@ -41,32 +45,32 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode using AsyncEngine."""
 
-    # 1. Создаем движок
+    # 1. make engine
     connectable = create_async_engine(
         settings.DATABASE_URL,
         poolclass=pool.NullPool,
     )
 
-    # 2. Обертка для асинхронного запуска
+    # 2. async function to run migrations
     async def do_run_migrations():
-        # !!! ИСПРАВЛЕНИЕ: используем async with для открытия соединения !!!
+        # !!! FIX: use async with to open connection !!!
         async with connectable.connect() as connection:
             await connection.run_sync(do_run_migrations_sync)
         
         await connectable.dispose()
 
-    # 3. Синхронная часть (выполняется внутри run_sync)
+    # 3. Synchronous part (runs inside run_sync)
     def do_run_migrations_sync(connection: Connection):
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
-            compare_type=True # Важно для отслеживания изменений типов
+            compare_type=True # Important for tracking type changes
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
-    # 4. Запуск
+    # 4. Run
     asyncio.run(do_run_migrations())
 
 

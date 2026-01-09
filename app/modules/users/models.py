@@ -1,28 +1,17 @@
-# from sqlalchemy import Column, Integer, String, Boolean, DateTime
-# from sqlalchemy.sql import func
-# from app.core.database import Base
-
-
-# class User(Base):
-#     __tablename__ = "users"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     email = Column(String(100), unique=True, nullable=False, index=True)
-#     hashed_password = Column(String(255), nullable=False)
-#     is_active = Column(Boolean, default=True)
-#     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from sqlalchemy import Column, Integer, String
 from app.core.database import Base
-
-# Наследуемся от Base (наш) и SQLAlchemyBaseUserTable (от библиотеки)
+from sqlalchemy.orm import relationship
+# Inherit from Base (ours) and SQLAlchemyBaseUserTable (from fastapi-users library)
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    # email, hashed_password, is_active, is_superuser, is_verified 
-    # уже есть внутри SQLAlchemyBaseUserTable, писать их не нужно!
+    # back_populates links this model to the field in Portfolio model
+    portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan") 
+    assets = relationship("Asset", back_populates="user")
+    # email, hashed_password, is_active, is_superuser, is_verified
+    # are already defined in SQLAlchemyBaseUserTable, no need to add them!
     
-    # Можем добавить свои поля, если захотим, например:
+    # You can add custom fields if needed, for example:
     # phone = Column(String, nullable=True)

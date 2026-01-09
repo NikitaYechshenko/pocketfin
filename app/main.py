@@ -6,53 +6,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.modules.users.schemas import UserRead, UserCreate, UserUpdate
 from app.modules.users.manager import auth_backend, fastapi_users
+from app.modules.portfolio.router import router as portfolio_router
+from app.modules.asset.router import router as asset_router
+from app.modules.users.router import router as users_router
 
-# Логирование
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+app = FastAPI(title="Asset Tracker",
+              swagger_ui_parameters={'persistAuthorization': True},)
 
-# Жизненный цикл (замена on_event startup)
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Тут можно добавить проверку БД при старте
-    logger.info("🚀 Starting Asset Tracker (Async)...")
-    yield
-    logger.info("🛑 Asset Tracker stopped")
-
-app = FastAPI(title="Asset Tracker", lifespan=lifespan)
-
-# CORS (Обязательно для фронтенда!)
+# CORS (Required for frontend!)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # В проде укажите конкретный домен
+    allow_origins=["*"],  # In production, specify exact domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# === ПОДКЛЮЧЕНИЕ РОУТЕРОВ FastAPI Users ===
+# === FASTAPI USERS ROUTERS ===
 
-# 1. Login / Logout
-app.include_router(
-    fastapi_users.get_auth_router(auth_backend),
-    prefix="/auth/jwt",
-    tags=["auth"],
-)
+# Connect all user-related routes (auth, register, users) in one line
+app.include_router(users_router)
 
-# 2. Регистрация
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
+# Connect portfolios
+app.include_router(portfolio_router)
 
-# 3. Управление пользователями (получить текущего, обновить профиль и т.д.)
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
-
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "mode": "async"}
+# Connect assets
+app.include_router(asset_router)

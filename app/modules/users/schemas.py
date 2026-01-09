@@ -1,16 +1,16 @@
 from typing import Optional
 from fastapi_users import schemas
 
-# 1. Схема для чтения (то, что отдаем фронту)
+# 1. Schema for reading (response to frontend)
 class UserRead(schemas.BaseUser[int]):
-    # id, email, is_active, is_superuser, is_verified уже включены
+    # id, email, is_active, is_superuser, is_verified are already included
     pass
 
-# 2. Схема для создания (регистрация)
+# 2. Schema for creation (registration)
 class UserCreate(schemas.BaseUserCreate):
-    # email, password, is_active, is_superuser, is_verified уже включены
+    # email, password, is_active, is_superuser, is_verified are already included
     pass
 
-# 3. Схема для обновления (редактирование профиля)
+# 3. Schema for updates (profile editing)
 class UserUpdate(schemas.BaseUserUpdate):
     pass
