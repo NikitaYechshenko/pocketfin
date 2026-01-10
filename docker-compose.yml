@@ -8,19 +8,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gat_db
-
     ports:
-      ports:
-      - "5433:5432"
-      # Host Port (5433) : Container Port (5432)
+      - "5433:5432"  # Убрал лишнюю вложенность 'ports:'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
-
-
-# docker volume rm $(docker volume ls -q)
-# docker compose down -v
-# docker compose up --build
-
