@@ -3,6 +3,9 @@
 Instructions for running the project locally (Backend + Frontend + PostgreSQL + pgAdmin).
 
 ---
+## 0. Change .env.example to .env
+
+---
 
 ## 1. Infrastructure startup (Docker)
 
