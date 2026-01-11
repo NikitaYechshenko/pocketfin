@@ -79,5 +79,4 @@ class AssetService:
         await self.repository.delete(asset)
         return True
 
-        return True
 

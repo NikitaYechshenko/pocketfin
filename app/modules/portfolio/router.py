@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from app.modules.users.manager import fastapi_users
 from app.modules.users.models import User
-from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate
+from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate, PortfolioWithAssetsRead
 from app.modules.portfolio.service import PortfolioService
 
 router = APIRouter(prefix="/portfolios", tags=["portfolios"])
@@ -95,16 +95,6 @@ async def delete_portfolio(
 
     await session.commit()
 
-
-    # ...existing code...
-from app.modules.portfolio.schemas import (
-    PortfolioCreate,
-    PortfolioRead,
-    PortfolioUpdate,
-    PortfolioWithAssetsRead  # new import
-)
-
-# ...existing code...
 
 @router.get("/{portfolio_id}/with-assets", response_model=PortfolioWithAssetsRead, summary="Get portfolio with all assets")
 async def get_portfolio_with_assets(
