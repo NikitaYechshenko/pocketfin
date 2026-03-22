@@ -13,7 +13,7 @@ from app.core.database import Base
 # make sure to import all your models here for 'autogenerate' support
 from app.modules.users.models import User
 from app.modules.portfolio.models import Portfolio
-from app.modules.asset.models import Asset
+from app.modules.transactions.models import Transaction
 
 # Alembic Config object
 config = context.config

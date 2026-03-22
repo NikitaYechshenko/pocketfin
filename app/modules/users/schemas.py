@@ -1,16 +1,51 @@
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from fastapi_users import schemas
 
-# 1. Schema for reading (response to frontend)
-class UserRead(schemas.BaseUser[int]):
-    # id, email, is_active, is_superuser, is_verified are already included
-    pass
 
-# 2. Schema for creation (registration)
-class UserCreate(schemas.BaseUserCreate):
-    # email, password, is_active, is_superuser, is_verified are already included
-    pass
 
-# 3. Schema for updates (profile editing)
-class UserUpdate(schemas.BaseUserUpdate):
-    pass
+# ----------------------------- User Schemas ------------------
+class UserBase(BaseModel):
+    email: EmailStr
+
+
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=3, max_length=32)
+    telegram_id: Optional[int] = None
+
+
+class UserResponse(UserBase):
+    id: int
+    telegram_id: Optional[int] = None
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+# token schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    class Config:
+        from_attributes = True
+
+
+
+# ----------------------------- Telegram Bot User Schema ------------------
+# class tbotUserCreate(BaseModel):
+#     telegram_id: int
+#     telegram_username: str
+
+# class tbotUserResponse(tbotUserCreate):
+#     id: int
+#     telegram_id: int
+#     email: Optional[EmailStr] = None
+#     is_active: bool
+#     telegram_username: Optional[str] = None
+    
+#     class Config:
+#         from_attributes = True
+
+
+
+

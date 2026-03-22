@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -14,16 +14,4 @@ class Portfolio(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     # back_populates links this model to the field in User model
     user = relationship("User", back_populates="portfolios")
-    assets = relationship("Asset", back_populates="portfolio")
-
-
-
-
-
-
-
-
-
-
-
-
+    transactions = relationship("Transaction", back_populates="portfolio", cascade="all, delete-orphan")

@@ -2,21 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_async_session
-from app.modules.users.manager import fastapi_users
+from app.modules.users.deps import get_current_user
 from app.modules.users.models import User
-from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate, PortfolioWithAssetsRead
+from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate, PortfolioWithTransactionsRead
 from app.modules.portfolio.service import PortfolioService
 
 router = APIRouter(prefix="/portfolios", tags=["portfolios"])
 
-# Dependency to get the currently authenticated user
-current_user = fastapi_users.current_user()
-
-
 @router.post("", response_model=PortfolioRead, status_code=status.HTTP_201_CREATED)
 async def create_portfolio(
     portfolio_data: PortfolioCreate,
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Create a new portfolio for the current user."""
@@ -28,7 +24,7 @@ async def create_portfolio(
 
 @router.get("", response_model=list[PortfolioRead])
 async def get_portfolios(
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Get all portfolios for the current user."""
@@ -40,7 +36,7 @@ async def get_portfolios(
 @router.get("/{portfolio_id}", response_model=PortfolioRead)
 async def get_portfolio(
     portfolio_id: int,
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Get a specific portfolio by ID."""
@@ -60,7 +56,7 @@ async def get_portfolio(
 async def update_portfolio(
     portfolio_id: int,
     portfolio_data: PortfolioUpdate,
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Update a portfolio."""
@@ -80,7 +76,7 @@ async def update_portfolio(
 @router.delete("/{portfolio_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_portfolio(
     portfolio_id: int,
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """Delete a portfolio."""
@@ -96,10 +92,10 @@ async def delete_portfolio(
     await session.commit()
 
 
-@router.get("/{portfolio_id}/with-assets", response_model=PortfolioWithAssetsRead, summary="Get portfolio with all assets")
+@router.get("/{portfolio_id}/with-assets", response_model=PortfolioWithTransactionsRead , summary="Get portfolio with all assets")
 async def get_portfolio_with_assets(
     portfolio_id: int,
-    user: User = Depends(current_user),
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     """

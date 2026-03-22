@@ -43,7 +43,7 @@ class PortfolioRepository:
         """Get portfolio by ID with user ownership check and eagerly load assets."""
         query = (
             select(Portfolio)
-            .options(selectinload(Portfolio.assets))
+            .options(selectinload(Portfolio.transactions))  # Eagerly load transactions (assets)
             .where(
                 Portfolio.id == portfolio_id,
                 Portfolio.user_id == user_id,

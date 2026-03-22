@@ -7,7 +7,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.portfolio.repository import PortfolioRepository
-from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate, PortfolioWithAssetsRead
+from app.modules.portfolio.schemas import PortfolioCreate, PortfolioRead, PortfolioUpdate, PortfolioWithTransactionsRead
 
 
 class PortfolioService:
@@ -101,7 +101,7 @@ class PortfolioService:
     
     ################################################
 
-    async def get_portfolio_with_assets(self, portfolio_id: int, user_id: int) -> PortfolioWithAssetsRead:
+    async def get_portfolio_with_assets(self, portfolio_id: int, user_id: int) -> PortfolioWithTransactionsRead:
         """
         Get portfolio with all its assets.
         
@@ -128,4 +128,4 @@ class PortfolioService:
         
         # Convert to Pydantic schema with nested assets
         # SQLAlchemy has already loaded assets via relationship("Asset", ...)
-        return PortfolioWithAssetsRead.model_validate(portfolio)
+        return PortfolioWithTransactionsRead.model_validate(portfolio)

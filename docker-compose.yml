@@ -1,33 +1,19 @@
 services:
-  # Сервис базы данных
   db:
-    image: postgres:16-alpine
-    container_name: my_postgres_db
+    image: postgres:15-alpine
+    container_name: gat_db_container
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: ${DB_USER}         # env DB_USER
-      POSTGRES_PASSWORD: ${DB_PASSWORD} # env DB_PASSWORD
-      POSTGRES_DB: ${DB_NAME}       # env DB_NAME
+      # Переменные, которые ожидает официальный образ Postgres
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     ports:
-      - "${DB_PORT}:5432"  # PostgreSQL default port inside container
+      - "${DB_PORT}:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-
-  # Сервис GUI (pgAdmin 4)
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: my_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com # POSTGRES user for pgAdmin login
-      PGADMIN_DEFAULT_PASSWORD: admin     # POSTGRES password for pgAdmin login
-      PGADMIN_SERVER_JSON_FILE: /servers.json # Path to the servers.json file inside the container
-    ports:
-      - "8080:80"
-    volumes:
-      - ./servers.json:/servers.json
-    depends_on:
-      - db
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  postgres_data:

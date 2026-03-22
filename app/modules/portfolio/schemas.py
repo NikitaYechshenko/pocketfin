@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import Optional
 
-from app.modules.asset.schemas import AssetRead
+from app.modules.transactions.schemas import TransactionRead
 
 
 class PortfolioBase(BaseModel):
@@ -29,10 +29,6 @@ class PortfolioRead(PortfolioBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PortfolioWithAssetsRead(PortfolioRead):
-    """Schema for reading portfolio data with associated assets."""
-    assets: list[AssetRead] = Field(default_factory=list, description="List of assets in the portfolio")
-
-
-
-
+class PortfolioWithTransactionsRead(PortfolioRead):
+    """Schema for reading portfolio data with associated transactions."""
+    transactions: list[TransactionRead] = Field(default_factory=list, description="List of transactions in the portfolio")
