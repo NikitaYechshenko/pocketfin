@@ -1,65 +1,32 @@
-# 🌍 Global-Asset-Tracker
+# 📱 PocketFin
 
-**Global-Asset-Tracker** is a modern tool designed for those who value simplicity, privacy, and full control over their finances. Track your investments, bank deposits, and crypto assets in one flexible and intuitive interface.
+**PocketFin** (formerly *Global-Asset-Tracker*) is a convenient, open-source application for tracking your investments across cryptocurrency and the stock market.
 
-## ✨ Key Features
+Our main goal is to provide retail investors with a simple, accessible tool to monitor and analyze all their assets in one place, completely free of visual noise.
 
-### 🔒 Uncompromising Privacy
+## ✨ Under the Hood & Philosophy
 
-Your data belongs to you alone. The application architecture is designed so that no one—including the developers—can access your portfolio. We believe financial information must remain private.
+* **Performance & Architecture:** The core service is built on **FastAPI**. We pay huge attention to solid architecture and apply robust optimization measures. Our goal is to deliver top-tier performance while ensuring the core application remains absolutely **free** to use.
+* **Open Source:** The code is completely open. Right now, you can watch the service being built in real-time, audit its security, and actively participate in its development.
+* **Accessibility:** We focus on the everyday user who simply wants a clear, intuitive way to see and manage their money.
 
-### 🎨 Visual Clarity (Clean UI)
+## 🚀 Upcoming Plans (April Release)
 
-We eliminate "information noise." The Global-Asset-Tracker interface is not overloaded with unnecessary data. You see only what matters for your decision-making, presented in a clean, visual format.
+We are actively preparing to launch our first version (MVP) in April. 
+Here is what it will include:
+* The ability to add and track cryptocurrency assets.
+* A fully functional **Telegram Mini App** for instant access to your portfolio directly from the messenger.
 
-### 📈 Global Reach & Accessibility
+## 🔥 Looking for a Frontend Developer!
 
-* **Free for everyone:** Track popular quotes, stocks, and ETFs without hidden subscriptions.
-* **Diverse Asset Support:** From bank deposits and cash to complex reinvestments and financial instruments.
-* **Multi-Portfolio Management:** Separate your personal savings, retirement fund, and high-risk strategies into different "buckets."
+The project is growing rapidly, and the backend is well underway, but we **really need help with the frontend!** If you are a frontend developer interested in FinTech, building clean interfaces (including Telegram Mini Apps), and want to make a meaningful impact on a cool open-source project—we would love to have you on board!
 
-### 🔄 Data Transparency & Freedom
+**How to contribute:**
+1. Check out the code and open an Issue or a Pull Request right here in the repository.
+2. Reach out to me directly to say hi and discuss potential tasks.
 
-* **Transaction History:** A clear visualization of when and where your assets were moved.
-* **Data Portability:** Easily import or export your data for analysis in other tools. No vendor lock-in.
+## 👥 Contact & Team
 
----
-
-## 🛡 Open Source Philosophy
-
-We believe that a tool for managing personal wealth must be transparent. Therefore, the **Global-Asset-Tracker Core will always be Open Source.**
-
-* **Security:** Anyone can audit the code to ensure data remains secure.
-* **Independence:** The core functionality required by 99% of retail investors will remain free and accessible forever.
-
-#### Why Premium Features?
-
-In the future, we plan to introduce advanced features for professional users. Our goal is not to limit the average user, but to provide specific tools for those investing at an institutional or highly advanced level (e.g., risk modeling, API automation, and professional analytics).
-
----
-
-## 🗺 Roadmap & Roles (Notion)
-
-Our detailed development plan, required roles (designers, developers, translators), and current task board are managed on our official Notion page:
-
-👉 **[View Global-Asset-Tracker on Notion](https://accurate-pansy-663.notion.site/Global-Asset-Tracker-2d1ce24807ca80a89a12cc298c61d05f?source=copy_link)**
-
----
-
-## 👥 Team & Contact
-
-### Maintainer
-
-* **Nikita Y** ([@GitHub](https://github.com/NikitaYechshenko)) — Project Founder and Lead Developer. Responsible for core architecture and final releases.
-* ✈️ **Telegram:** [@nikitayech](https://t.me/nikitayech)
-
-
-### 🤝 How to Contribute?
-
-We welcome contributions of all kinds! If you want to help improve the project:
-
-1. Open an **Issue** to report a bug or suggest a feature.
-2. Submit a **Pull Request** with your improvements.
-3. Feel free to contact **Nikita Y** directly for a quick chat!
-
----
+**Nikita (Nikita Y)** — Founder and Lead Developer.
+* **GitHub:** [@NikitaYechshenko](https://github.com/NikitaYechshenko)
+* **Telegram:** [@nikitayech](https://t.me/nikitayech) — *Feel free to DM me with any questions or if you want to jump in and help with the frontend!*
